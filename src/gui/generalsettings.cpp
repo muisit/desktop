@@ -79,8 +79,6 @@ GeneralSettings::GeneralSettings(QWidget *parent)
     connect(_ui->legalNoticeButton, &QPushButton::clicked, this, &GeneralSettings::slotShowLegalNotice);
 
     loadMiscSettings();
-    // updater info now set in: customizeStyle
-    //slotUpdateInfo();
 
     // misc
     connect(_ui->monoIconsCheckBox, &QAbstractButton::toggled, this, &GeneralSettings::saveMiscSettings);
@@ -88,6 +86,12 @@ GeneralSettings::GeneralSettings(QWidget *parent)
     connect(_ui->newFolderLimitCheckBox, &QAbstractButton::toggled, this, &GeneralSettings::saveMiscSettings);
     connect(_ui->newFolderLimitSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &GeneralSettings::saveMiscSettings);
     connect(_ui->newExternalStorage, &QAbstractButton::toggled, this, &GeneralSettings::saveMiscSettings);
+
+#ifdef Q_OS_MAC
+    connect(_ui->showDockIconCheckBox, &QAbstractButton::toggled, this, &GeneralSettings::slotToggleShowDockIcon);
+#else
+    _ui->showDockIconCheckBox->setVisible(false);
+#endif
 
 #ifndef WITH_CRASHREPORTER
     _ui->crashreporterCheckBox->setVisible(false);
@@ -156,6 +160,10 @@ void GeneralSettings::loadMiscSettings()
     _ui->newFolderLimitSpinBox->setValue(newFolderLimit.second);
     _ui->newExternalStorage->setChecked(cfgFile.confirmExternalStorage());
     _ui->monoIconsCheckBox->setChecked(cfgFile.monoIcons());
+
+#ifdef Q_OS_MAC
+    _ui->showDockIconCheckBox->setChecked(cfgFile.showDockIcon());
+#endif
 }
 
 #if defined(BUILD_UPDATER)
@@ -247,6 +255,14 @@ void GeneralSettings::slotShowInExplorerNavigationPane(bool checked)
     // Now update the registry with the change.
     FolderMan::instance()->navigationPaneHelper().setShowInExplorerNavigationPane(checked);
 }
+
+#ifdef Q_OS_MAC
+void GeneralSettings::slotToggleShowDockIcon(bool checked)
+{
+    ConfigFile cfgFile;
+    cfgFile.setShowDockIcon(checked);
+}
+#endif
 
 void GeneralSettings::slotIgnoreFilesEditor()
 {

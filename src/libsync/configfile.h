@@ -146,6 +146,9 @@ public:
     bool showInExplorerNavigationPane() const;
     void setShowInExplorerNavigationPane(bool show);
 
+    bool showDockIcon() const;
+    void setShowDockIcon(bool show);
+
     int timeout() const;
     quint64 chunkSize() const;
     quint64 maxChunkSize() const;

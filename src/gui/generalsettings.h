@@ -50,10 +50,15 @@ private slots:
     void slotIgnoreFilesEditor();
     void loadMiscSettings();
     void slotShowLegalNotice();
+
 #if defined(BUILD_UPDATER)
     void slotUpdateInfo();
     void slotUpdateCheckNow();
     void slotToggleAutoUpdateCheck();
+#endif
+
+#ifdef Q_OS_MAC
+    void slotToggleShowDockIcon(bool);
 #endif
 
 private:

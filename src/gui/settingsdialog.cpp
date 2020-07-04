@@ -139,7 +139,9 @@ SettingsDialog::SettingsDialog(ownCloudGui *gui, QWidget *parent)
     cfg.restoreGeometry(this);
 
 #ifdef Q_OS_MAC
-    setActivationPolicy(ActivationPolicy::Accessory);
+    if(!cfg.showDockIcon()) {
+        setActivationPolicy(ActivationPolicy::Accessory);
+    }
 #endif
 }
 
@@ -188,7 +190,8 @@ void SettingsDialog::changeEvent(QEvent *e)
 void SettingsDialog::setVisible(bool visible)
 {
 #ifdef Q_OS_MAC
-    if (visible) {
+    ConfigFile cfg;
+    if (visible || cfg.showDockIcon()) {
         setActivationPolicy(ActivationPolicy::Regular);
     } else {
         setActivationPolicy(ActivationPolicy::Accessory);
