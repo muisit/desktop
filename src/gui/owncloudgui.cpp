@@ -14,6 +14,7 @@
 
 #include "application.h"
 #include "owncloudgui.h"
+#include "configfile.h"
 #include "theme.h"
 #include "folderman.h"
 #include "progressdispatcher.h"
@@ -44,6 +45,8 @@
 
 #if defined(Q_OS_X11)
 #include <QX11Info>
+#elif defined(Q_OS_MAC)
+#include "settingsdialog_mac.h"
 #endif
 
 #include <QQmlEngine>
@@ -56,16 +59,33 @@ namespace OCC {
 
 const char propertyAccountC[] = "oc_account";
 
+ownCloudGui *ownCloudGui::_instance = nullptr;
+
+ownCloudGui *ownCloudGui::instance(Application *parent)
+{
+    if (!_instance) {
+        Q_ASSERT(parent);
+        _instance = new ownCloudGui(parent);
+    }
+    return _instance;
+}
+
 ownCloudGui::ownCloudGui(Application *parent)
     : QObject(parent)
     , _tray(nullptr)
-    , _settingsDialog(new SettingsDialog(this))
+    , _settingsDialog(nullptr)
     , _logBrowser(nullptr)
 #ifdef WITH_LIBCLOUDPROVIDERS
     , _bus(QDBusConnection::sessionBus())
 #endif
     , _app(parent)
 {
+}
+
+void ownCloudGui::init()
+{
+    _settingsDialog = new SettingsDialog(this);
+
     _tray = Systray::instance();
     _tray->setTrayEngine(new QQmlApplicationEngine(this));
     // for the beginning, set the offline icon until the account was verified
@@ -113,6 +133,11 @@ ownCloudGui::ownCloudGui(Application *parent)
         this, &ownCloudGui::slotShowOptionalTrayMessage);
     connect(Logger::instance(), &Logger::guiMessage,
         this, &ownCloudGui::slotShowGuiMessage);
+
+#ifdef Q_OS_MAC
+    // Initial Dock icon visibility
+    slotDialogVisibilityChanged(false);
+#endif
 }
 
 void ownCloudGui::createTray()
@@ -168,11 +193,11 @@ void ownCloudGui::slotTrayClicked(QSystemTrayIcon::ActivationReason reason)
     if (reason == QSystemTrayIcon::Trigger) {
         if (OwncloudSetupWizard::bringWizardToFrontIfVisible()) {
             // brought wizard to front
-        } else if (_shareDialogs.size() > 0) {
-            // Share dialog(s) be hidden by other apps, bring them back
-            Q_FOREACH (const QPointer<ShareDialog> &shareDialog, _shareDialogs) {
-                Q_ASSERT(shareDialog.data());
-                raiseDialog(shareDialog);
+        } else if (!_visibleDialogs.isEmpty()) {
+            // Dialog(s) be hidden by other apps, bring them back (e.g. Share / Settings / Auth dialogs)
+            Q_FOREACH (const QPointer<QDialog> &dialog, _visibleDialogs) {
+                Q_ASSERT(dialog.data());
+                raiseDialog(dialog);
             }
         } else if (_tray->isOpen()) {
             _tray->hideWindow();
@@ -646,9 +671,6 @@ void ownCloudGui::slotShowShareDialog(const QString &sharePath, const QString &l
         return;
     }
 
-    // For https://github.com/owncloud/client/issues/3783
-    _settingsDialog->hide();
-
     const auto accountState = folder->accountState();
 
     const QString file = localPath.mid(folder->cleanPath().length() + 1);
@@ -700,6 +722,32 @@ void ownCloudGui::slotRemoveDestroyedShareDialogs()
             it.remove();
         }
     }
+}
+
+
+void ownCloudGui::slotDialogVisibilityChanged(bool visible)
+{
+    auto dialog = qobject_cast<QDialog *>(sender());
+    if (dialog) {
+        auto index = _visibleDialogs.indexOf(dialog);
+
+        if (visible && index < 0) {
+            _visibleDialogs.append(dialog);
+        } else if (!visible && index >= 0) {
+            _visibleDialogs.removeAt(index);
+        }
+    }
+
+#ifdef Q_OS_MAC
+    ConfigFile cfg;
+
+    // Dock icon visibility
+    if (!_visibleDialogs.isEmpty() || cfg.showDockIcon()) {
+        Mac::setActivationPolicy(Mac::ActivationPolicy::Regular);
+    } else {
+        Mac::setActivationPolicy(Mac::ActivationPolicy::Accessory);
+    }
+#endif
 }
 
 

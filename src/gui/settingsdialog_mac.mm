@@ -17,6 +17,9 @@
 #import <AppKit/AppKit.h>
 #include <QDebug>
 
+namespace OCC {
+namespace Mac {
+
 void setActivationPolicy(ActivationPolicy policy)
 {
     NSApplicationActivationPolicy mode = NSApplicationActivationPolicyRegular;
@@ -35,3 +38,6 @@ void setActivationPolicy(ActivationPolicy policy)
         qWarning() << "setActivationPolicy" << static_cast<int>(policy) << "failed";
     }
 }
+
+} // namespace Mac
+} // namespace OCC

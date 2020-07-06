@@ -52,7 +52,7 @@ class ownCloudGui : public QObject
 {
     Q_OBJECT
 public:
-    explicit ownCloudGui(Application *parent = nullptr);
+    static ownCloudGui *instance(Application *parent = nullptr);
 
     bool checkAccountExists(bool openSettings);
 
@@ -64,10 +64,13 @@ public:
     bool cloudProviderApiAvailable();
 #endif
     void createTray();
+    void init();
 
 signals:
     void setupProxy();
     void serverError(int code, const QString &message);
+
+    // Allow other classes to hook into isShowingSettingsDialog() signals (re-auth widgets, for example)
     void isShowingSettingsDialog();
 
 public slots:
@@ -105,6 +108,9 @@ public slots:
 
     void slotRemoveDestroyedShareDialogs();
 
+    // List of visible dialogs to raise on re-focus (also for macOS Dock icon visibility)
+    void slotDialogVisibilityChanged(bool visible);
+
 private slots:
     void slotLogin();
     void slotLogout();
@@ -113,6 +119,9 @@ private slots:
     void slotNewAccountWizard();
 
 private:
+    static ownCloudGui *_instance;
+    explicit ownCloudGui(Application *parent = nullptr);
+
     void setPauseOnAllFoldersHelper(bool pause);
 
     QPointer<Systray> _tray;
@@ -124,6 +133,7 @@ private:
 #endif
 
     QMap<QString, QPointer<ShareDialog>> _shareDialogs;
+    QList<QPointer<QDialog>> _visibleDialogs;
 
     QAction *_actionNewAccountWizard;
     QAction *_actionSettings;

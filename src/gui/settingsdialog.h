@@ -62,6 +62,7 @@ public slots:
 signals:
     void styleChanged();
     void onActivate();
+    void onSetVisible(bool visible);
 
 protected:
     void reject() override;

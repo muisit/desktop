@@ -40,12 +40,6 @@
 #include <QPainter>
 #include <QPainterPath>
 
-#ifdef Q_OS_MAC
-#include "settingsdialog_mac.h"
-
-void setActivationPolicy(ActivationPolicy policy);
-#endif
-
 namespace {
 const char TOOLBAR_CSS[] =
     "QToolBar { background: %1; margin: 0; padding: 0; border: none; border-bottom: 0 solid %2; spacing: 0; } "
@@ -134,15 +128,12 @@ SettingsDialog::SettingsDialog(ownCloudGui *gui, QWidget *parent)
 
     connect(this, &SettingsDialog::onActivate, gui, &ownCloudGui::slotSettingsDialogActivated);
 
+    // Dialog visibility
+    connect(this, &SettingsDialog::onSetVisible, gui, &ownCloudGui::slotDialogVisibilityChanged);
+
     customizeStyle();
 
     cfg.restoreGeometry(this);
-
-#ifdef Q_OS_MAC
-    if(!cfg.showDockIcon()) {
-        setActivationPolicy(ActivationPolicy::Accessory);
-    }
-#endif
 }
 
 SettingsDialog::~SettingsDialog()
@@ -189,14 +180,7 @@ void SettingsDialog::changeEvent(QEvent *e)
 
 void SettingsDialog::setVisible(bool visible)
 {
-#ifdef Q_OS_MAC
-    ConfigFile cfg;
-    if (visible || cfg.showDockIcon()) {
-        setActivationPolicy(ActivationPolicy::Regular);
-    } else {
-        setActivationPolicy(ActivationPolicy::Accessory);
-    }
-#endif
+    emit onSetVisible(visible);
     QDialog::setVisible(visible);
 }
 
