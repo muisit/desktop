@@ -47,6 +47,8 @@
 #include <QX11Info>
 #elif defined(Q_OS_MAC)
 #include "settingsdialog_mac.h"
+#include "legalnotice.h"
+#include <QMenuBar>
 #endif
 
 #include <QQmlEngine>
@@ -137,6 +139,28 @@ void ownCloudGui::init()
 #ifdef Q_OS_MAC
     // Initial Dock icon visibility
     slotDialogVisibilityChanged(false);
+
+    // Menu Bar
+    auto menuBar = new QMenuBar(nullptr);
+    auto menu = menuBar->addMenu(QString());
+
+    // Preferences
+    auto action = new QAction(this);
+    action->setMenuRole(QAction::PreferencesRole);
+    connect(action, &QAction::triggered, this, &ownCloudGui::slotShowSettings);
+    menu->addAction(action);
+
+    // About
+    action = new QAction(this);
+    action->setMenuRole(QAction::AboutRole);
+    connect(action, &QAction::triggered, [action] {
+        action->setEnabled(false);
+        auto notice = new LegalNotice();
+        notice->exec();
+        delete notice;
+        action->setEnabled(true);
+    });
+    menu->addAction(action);
 #endif
 }
 
