@@ -301,6 +301,17 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QCheckBox" name="maskWebDAVCommand">
+          <property name="text">
+           <string>Use HTTP Header to transmit WebDAV command</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_9">
         <item>
          <widget class="QCheckBox" name="crashreporterCheckBox">

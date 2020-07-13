@@ -59,6 +59,8 @@ GeneralSettings::GeneralSettings(QWidget *parent)
 
     connect(_ui->showInExplorerNavigationPaneCheckBox, &QAbstractButton::toggled, this, &GeneralSettings::slotShowInExplorerNavigationPane);
 
+    connect(_ui->maskWebDAVCommand, &QAbstractButton::toggled, this, &GeneralSettings::slotMaskWebDAVCommand);
+
     // Rename 'Explorer' appropriately on non-Windows
 #ifdef Q_OS_MAC
     QString txt = _ui->showInExplorerNavigationPaneCheckBox->text();
@@ -238,6 +240,12 @@ void GeneralSettings::slotToggleOptionalServerNotifications(bool enable)
 {
     ConfigFile cfgFile;
     cfgFile.setOptionalServerNotifications(enable);
+}
+
+void GeneralSettings::slotMaskWebDAVCommand(bool enable)
+{
+    ConfigFile cfgFile;
+    cfgFile.setMaskWebDAVCommand(enable);
 }
 
 void GeneralSettings::slotShowInExplorerNavigationPane(bool checked)

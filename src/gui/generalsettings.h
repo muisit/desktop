@@ -47,6 +47,7 @@ private slots:
     void slotToggleLaunchOnStartup(bool);
     void slotToggleOptionalServerNotifications(bool);
     void slotShowInExplorerNavigationPane(bool);
+    void slotMaskWebDAVCommand(bool);
     void slotIgnoreFilesEditor();
     void loadMiscSettings();
     void slotShowLegalNotice();

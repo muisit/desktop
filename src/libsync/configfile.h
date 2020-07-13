@@ -92,6 +92,9 @@ public:
     bool automaticLogDir() const;
     void setAutomaticLogDir(bool enabled);
 
+    bool maskWebDAVCommand() const;
+    void setMaskWebDAVCommand(bool enabled);
+
     QString logDir() const;
     void setLogDir(const QString &dir);
 

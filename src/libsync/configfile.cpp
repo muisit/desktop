@@ -63,6 +63,7 @@ static const char promptDeleteC[] = "promptDeleteAllFiles";
 static const char crashReporterC[] = "crashReporter";
 static const char optionalServerNotificationsC[] = "optionalServerNotifications";
 static const char showInExplorerNavigationPaneC[] = "showInExplorerNavigationPane";
+static const char maskWebDAVCommandC[] = "maskWebDAVCommand";
 static const char skipUpdateCheckC[] = "skipUpdateCheck";
 static const char autoUpdateCheckC[] = "autoUpdateCheck";
 static const char updateCheckIntervalC[] = "updateCheckInterval";
@@ -205,6 +206,19 @@ void ConfigFile::setShowInExplorerNavigationPane(bool show)
     QSettings settings(configFile(), QSettings::IniFormat);
     settings.setValue(QLatin1String(showInExplorerNavigationPaneC), show);
     settings.sync();
+}
+
+void ConfigFile::setMaskWebDAVCommand(bool show)
+{
+    QSettings settings(configFile(), QSettings::IniFormat);
+    settings.setValue(QLatin1String(maskWebDAVCommandC), show);
+    settings.sync();
+}
+
+bool ConfigFile::maskWebDAVCommand() const
+{
+    QSettings settings(configFile(), QSettings::IniFormat);
+    return settings.value(QLatin1String(maskWebDAVCommandC), false).toBool();
 }
 
 int ConfigFile::timeout() const
